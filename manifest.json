@@ -1,0 +1,1 @@
+{"manifest_version":3,"name":"VK Антиспам Auto","version":"0.3.0","permissions":["activeTab","scripting"],"action":{"default_title":"VK Антиспам: открыть панель"},"background":{"service_worker":"worker.js"}}
