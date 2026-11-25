@@ -1,0 +1,1 @@
+chrome.action.onClicked.addListener(async tab=>{if(/^https:\/\/(www\.)?vk\.(ru|com)\/im(?:[/?#]|$)/.test(tab.url||'')) await chrome.scripting.executeScript({target:{tabId:tab.id},files:['auto.js']});});
