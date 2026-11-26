@@ -1,0 +1,37 @@
+name: Publish AntiSpam archives
+on:
+  push:
+    branches: [main]
+    paths: ['.github/workflows/publish-antispam.yml']
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: antispam-release-publication
+  cancel-in-progress: false
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ github.token }}
+    steps:
+      - name: Publish versioned ZIP files
+        shell: bash
+        run: |
+          set -euo pipefail
+          gh api "repos/$GITHUB_REPOSITORY/tarball/$GITHUB_SHA" > source.tar.gz
+          tar -xzf source.tar.gz --strip-components=1
+          for archive in releases/antispam-vk-*.zip; do
+            version="${archive#releases/antispam-vk-}"
+            version="${version%.zip}"
+            tag="v$version"
+            if gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+              echo "$tag already exists"
+              continue
+            fi
+            status=--latest=false
+            if [[ "$version" == 0.8.5 ]]; then status=--latest; fi
+            gh release create "$tag" "$archive" --repo "$GITHUB_REPOSITORY" \
+              --target "$GITHUB_SHA" --title "AntiSpam $version" \
+              --notes-file "releases/$version.md" "$status"
+          done
